@@ -1,0 +1,62 @@
+version: '3.8'
+
+name: avito-monitor
+
+services:
+  avito-monitor:
+    build: .
+    container_name: avito-monitor-app
+    hostname: avito-monitor
+    restart: unless-stopped
+    ports:
+      - "3000:3000"  # HTTP API
+      - "3001:3001"  # WebSocket
+    environment:
+      - NODE_ENV=production
+      - TZ=Europe/Moscow
+      - PORT=3000
+      - WS_PORT=3001
+      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+      - CHROME_PATH=/usr/bin/chromium-browser
+      - LOG_LEVEL=info
+      - TARGET_NAMES=${TARGET_NAMES:-"Рушан Натфуллин,Рушан"}
+    env_file:
+      - .env  # Файл с секретными переменными (не коммитить в git!)
+    volumes:
+      - avito-data:/app/data  # Сохранение данных между перезапусками
+      - avito-logs:/app/logs  # Логи приложения
+      - ./config:/app/config:ro  # Конфигурационные файлы (если будут)
+    networks:
+      - avito-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', (r) => {if(r.statusCode===200)process.exit(0);process.exit(1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
+
+volumes:
+  avito-data:
+    driver: local
+  avito-logs:
+    driver: local
+
+networks:
+  avito-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

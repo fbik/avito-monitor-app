@@ -1,0 +1,41 @@
+version: '3.8'
+
+name: avito-monitor-dev
+
+services:
+  avito-monitor:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      args:
+        - NODE_ENV=development
+    container_name: avito-monitor-dev
+    hostname: avito-monitor-dev
+    ports:
+      - "3000:3000"
+      - "3001:3001"
+      - "9229:9229"  # Node.js debug port
+    environment:
+      - NODE_ENV=development
+      - TZ=Europe/Moscow
+      - DEBUG=avito-monitor:*
+      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+      - TARGET_NAMES=Рушан Натфуллин,Рушан
+    volumes:
+      - .:/app  # Монтируем весь проект для hot-reload
+      - /app/node_modules  # Не перезаписываем node_modules
+      - /app/dist  # Не перезаписываем dist
+      - ./dev-data:/app/data  # Данные для разработки
+      - ./dev-logs:/app/logs  # Логи разработки
+    networks:
+      - avito-dev-network
+    command: npm run start:dev
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+    profiles:
+      - development
+
+networks:
+  avito-dev-network:
+    driver: bridge
