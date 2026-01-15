@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
 import { MessagesModule } from './messages/messages.module';
-import { WebsocketModule } from './websocket/websocket.module';
+import { AppController } from './app.controller';
 
 @Module({
-  imports: [MessagesModule, WebsocketModule],
+  imports: [MessagesModule],
+  controllers: [AppController],
 })
 export class AppModule {}
