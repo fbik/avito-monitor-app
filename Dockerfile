@@ -49,7 +49,19 @@ WORKDIR /app
 # Копируем собранное приложение из builder stage
 COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
+COPY --from=builder --chown=nodejs:nodejs /app/public ./public  # <-- ЭТО ВАЖНО!
 COPY --from=builder --chown=nodejs:nodejs /app/package*.json ./
+
+# Проверяем, что public директория скопировалась
+RUN echo "=== Checking public directory ===" && \
+    if [ -d "public" ]; then \
+      echo "✅ Public directory exists" && \
+      ls -la public/; \
+    else \
+      echo "❌ Public directory not found" && \
+      echo "Current directory contents:" && \
+      ls -la; \
+    fi
 
 # Настройки окружения для Puppeteer и приложения
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
