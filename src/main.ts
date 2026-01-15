@@ -14,7 +14,6 @@ async function bootstrap() {
   
   console.log('=== Initializing static file serving ===');
   console.log('Current working directory:', process.cwd());
-  console.log('__dirname:', __dirname);
   console.log('Public directory path:', publicDir);
   
   // Создаем public директорию если её нет
@@ -91,10 +90,14 @@ async function bootstrap() {
   app.enableCors();
   
   const port = process.env.PORT || 3000;
+  
+  // Запускаем сервер
   await app.listen(port);
+  
   console.log(`🚀 Application is running on: http://localhost:${port}`);
   console.log(`✅ Interface: http://localhost:${port}`);
   console.log(`📁 Static files served from: ${publicDir}`);
+  console.log(`🔌 WebSocket доступен на том же порту: ws://localhost:${port}`);
   
   // Проверяем доступность файлов
   console.log('=== File System Check ===');
