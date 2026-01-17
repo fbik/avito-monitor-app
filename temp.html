@@ -593,14 +593,14 @@ class AvitoMonitor {
         const avatarText = message.sender.charAt(0).toUpperCase();
         const time = new Date(message.timestamp).toLocaleTimeString();
         
-        messageElement.innerHTML = \`
-            <div class="message-avatar">\${avatarText}</div>
+        messageElement.innerHTML = `
+            <div class="message-avatar">${avatarText}</div>
             <div class="message-content">
-                <div class="message-sender">\${message.sender}</div>
-                <div class="message-text">\${message.text}</div>
-                <div class="message-time">\${time}</div>
+                <div class="message-sender">${message.sender}</div>
+                <div class="message-text">${message.text}</div>
+                <div class="message-time">${time}</div>
             </div>
-        \`;
+        `;
         
         // Добавляем в начало
         messagesList.insertBefore(messageElement, messagesList.firstChild);
@@ -608,13 +608,13 @@ class AvitoMonitor {
 
     clearMessages() {
         const messagesList = document.getElementById('messages-list');
-        messagesList.innerHTML = \`
+        messagesList.innerHTML = 
             <div class="empty-state">
                 <i class="fas fa-inbox"></i>
                 <h3>Нет сообщений</h3>
                 <p>Сообщения появятся здесь после запуска мониторинга</p>
             </div>
-        \`;
+        ;
         this.updateStatus('messages', 0);
     }
 
@@ -655,7 +655,7 @@ class AvitoMonitor {
         // Сообщения
         document.getElementById('message-count').textContent = this.status.messages;
         document.getElementById('last-check').textContent = 
-            this.status.lastCheck ? \`Последняя проверка: \${this.status.lastCheck}\` : 'Нет данных';
+            this.status.lastCheck ? `Последняя проверка: \${this.status.lastCheck}` : 'Нет данных';
         
         // Кнопки
         const startBtn = document.getElementById('btn-start');
@@ -674,7 +674,7 @@ class AvitoMonitor {
 
     showNotification(message, type = 'info') {
         // Создаем простой alert (можно заменить на toast-уведомления)
-        alert(\`[\${type.toUpperCase()}] \${message}\`);
+        alert(`[${type.toUpperCase()}] ${message}`);
     }
 }
 

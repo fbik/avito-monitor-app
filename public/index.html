@@ -318,6 +318,75 @@
         .notification.error {
             background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
         }
+
+        /* Стили для модального окна авторизации */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 0;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .close-modal {
+            font-size: 28px;
+            cursor: pointer;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -447,6 +516,32 @@
             <p>Avito Messages Monitor © 2024 | Real-time messaging monitoring system</p>
             <p>Версия 1.0.0 | Сервер: <span id="serverStatus">Не подключен</span></p>
         </footer>
+    </div>
+
+    <!-- Модальное окно авторизации -->
+    <div id="authModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🔑 Авторизация в Avito</h3>
+                <span class="close-modal" onclick="closeAuthModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="authForm">
+                    <div class="form-group">
+                        <label for="username">Логин:</label>
+                        <input type="text" id="username" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Пароль:</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary" onclick="closeAuthModal()">Отмена</button>
+                        <button type="submit" class="btn-primary">Войти</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 
     <!-- Socket.io клиент -->
@@ -845,15 +940,13 @@
                 showNotification('Сначала подключитесь к серверу', 'error');
                 return;
             }
-            
-            const username = prompt('Введите логин Avito:');
-            if (!username) return;
-            
-            const password = prompt('Введите пароль Avito:');
-            if (!password) return;
-            
-            socket.emit('auth_request', { username, password });
-            showNotification('Авторизация выполняется...', 'info');
+
+            document.getElementById('authModal').style.display = 'block';
+        }
+
+        function closeAuthModal() {
+            document.getElementById('authModal').style.display = 'none';
+            document.getElementById('authForm').reset();
         }
         
         function logoutAvito() {
@@ -918,10 +1011,10 @@
         // Автоподключение при загрузке страницы
         window.addEventListener('DOMContentLoaded', () => {
             console.log('Страница загружена, подключаем Socket.io...');
-            
+
             // Пытаемся подключиться сразу
             connectWebSocket();
-            
+
             // Автоматическое переподключение каждые 10 секунд если отключены
             setInterval(() => {
                 if (!isConnected && reconnectAttempts < maxReconnectAttempts) {
@@ -929,7 +1022,7 @@
                     connectWebSocket();
                 }
             }, 10000);
-            
+
             // Обновление времени каждую минуту
             setInterval(() => {
                 if (isConnected) {
@@ -937,8 +1030,27 @@
                     document.getElementById('uptime').textContent = uptime + 1;
                 }
             }, 60000);
+
+            // Обработчик формы авторизации
+            document.getElementById('authForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const username = document.getElementById('username').value.trim();
+                const password = document.getElementById('password').value;
+
+                if (!username || !password) {
+                    showNotification('Заполните все поля', 'error');
+                    return;
+                }
+
+                // Отправка данных
+                socket.emit('auth_request', { username, password });
+                showNotification('Авторизация выполняется...', 'info');
+
+                // Закрываем модальное окно
+                closeAuthModal();
+            });
         });
     </script>
 </body>
 </html>
-
